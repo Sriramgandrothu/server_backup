@@ -1,0 +1,8 @@
+# One line per app:   app | base url | env file with CRON_SECRET | log file
+# Copy this file to apps.conf and edit it. apps.conf is ignored by git.
+#
+# The base URL is where the app listens on the server itself. A local address keeps the call
+# off the public internet.
+
+myapp   | http://127.0.0.1:3000 | /opt/apps/myapp/.env   | /var/log/cron-jobs/myapp.log
+billing | http://127.0.0.1:3001 | /opt/apps/billing/.env | /var/log/cron-jobs/billing.log

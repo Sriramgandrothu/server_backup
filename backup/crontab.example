@@ -1,0 +1,13 @@
+# Example crontab. Install with:  crontab -e
+# The server clock is usually UTC. Check with:  date
+# Fields: minute hour day-of-month month day-of-week   (0 or 7 = Sunday, 6 = Saturday)
+
+# Daily jobs. Each call writes a log block to the app's log file.
+30 0 * * * /opt/server-tools/cron/run-cron-job.sh myapp scheduled-messages /api/cron/scheduled-messages
+0  1 * * * /opt/server-tools/cron/run-cron-job.sh myapp update-ages        /api/cron/update-ages
+
+# A job that runs often: add "quiet" so only failures are logged.
+*/5 * * * * /opt/server-tools/cron/run-cron-job.sh billing health-check /api/cron/health quiet
+
+# Weekly Google Drive backup. 21:30 UTC on Saturday is 03:00 on Sunday in India (IST, UTC+5:30).
+30 21 * * 6 /opt/drive-backup/weekly-drive-backup.sh

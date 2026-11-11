@@ -1,0 +1,13 @@
+# Secrets and machine state. None of these may ever be committed.
+rclone.conf
+age-key.txt
+age-recipient.txt
+*.age
+.env
+.env.*
+!.env.example
+apps.conf
+state/
+tmp/
+*.log
+lock

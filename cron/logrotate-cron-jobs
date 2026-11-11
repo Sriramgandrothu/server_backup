@@ -1,0 +1,12 @@
+# Keep cron job logs from growing forever.
+# Install:  sudo cp logrotate-cron-jobs /etc/logrotate.d/cron-jobs
+# Test:     sudo logrotate --debug /etc/logrotate.d/cron-jobs
+/var/log/cron-jobs/*.log {
+    weekly
+    rotate 8
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}
