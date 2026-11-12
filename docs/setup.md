@@ -96,7 +96,12 @@ scp backup/weekly-drive-backup.sh USER@SERVER:/opt/drive-backup/
 ssh USER@SERVER chmod 700 /opt/drive-backup/weekly-drive-backup.sh
 ```
 
-Edit the block at the top (`EDIT THIS BLOCK`):
+Put your settings in `backup.conf` next to the script (start from `backup/backup.conf.example`). It overrides the block at the top of the script (`EDIT THIS BLOCK`), so later you can replace the script with a newer copy from this repository without editing it again:
+
+```bash
+scp backup/backup.conf.example USER@SERVER:/opt/drive-backup/backup.conf
+ssh USER@SERVER chmod 600 /opt/drive-backup/backup.conf
+```
 
 | Setting | Set it to |
 | --- | --- |
@@ -104,7 +109,8 @@ Edit the block at the top (`EDIT THIS BLOCK`):
 | `ROOT` | The top folder name in Drive. It is created on the first run. |
 | `BASE` | The server folder from step 2 |
 | `APP_ROOT` | The folder that holds your apps. Every `.env` file under it is backed up. |
-| `DB_TARGETS` | One line per Postgres container: `"section\|folder\|container\|user"`. Use `auto` as the user to read `POSTGRES_USER` from the container. |
+| `DB_TARGETS` | One line per Postgres container: `"section\|folder\|container\|user"`. Use `auto` to read `POSTGRES_USER` from the container; if that login no longer exists (for example it was renamed), it falls back to `postgres`. |
+| `ENV_EXCLUDE` | Folders under `APP_ROOT` whose env files are skipped, such as old backups or logs. |
 
 Find container names with `docker ps --format '{{.Names}}'`. Every database inside a container is backed up, plus its roles and grants.
 
@@ -174,4 +180,4 @@ Download `encryption key/age-key.txt` from Drive once and keep it in a password 
 
 ## Add a database later
 
-Add one line to `DB_TARGETS` in the script. A new database container is not backed up until you do. New env files, cron jobs and nginx sites need no change: the next run finds them.
+Add one line to `DB_TARGETS` in `backup.conf`. A new database container is not backed up until you do. New env files, cron jobs and nginx sites need no change: the next run finds them.

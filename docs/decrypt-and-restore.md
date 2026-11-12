@@ -78,7 +78,7 @@ Replace the live database (**this overwrites live data**: stop the apps that use
 docker exec -i main-db pg_restore -U postgres -d postgres --clean --if-exists --no-owner < restored.dump
 ```
 
-Use the database user from your `DB_TARGETS` line. If it was `auto`, read it with `docker exec <container> printenv POSTGRES_USER`.
+Use the database user from your `DB_TARGETS` line. If it was `auto`, read it with `docker exec <container> printenv POSTGRES_USER`; if that login no longer exists, use `postgres`.
 
 Roles and grants (only needed on a fresh server):
 

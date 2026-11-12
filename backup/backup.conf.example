@@ -1,0 +1,25 @@
+# Per-server settings for weekly-drive-backup.sh.
+# Copy to backup.conf next to the script. Every value here overrides the block at the top of the
+# script, so you can update the script from the repository without editing it again.
+# This file holds no secrets, but it describes your server, so it is git-ignored.
+
+REMOTE="gdrive"
+ROOT="Server Backup"
+BASE=/opt/drive-backup
+APP_ROOT=/opt/apps
+ENV_SECTION="env backup"
+NGINX_SECTION="nginx backup"
+CRON_SECTION="cron backup"
+KEY_SECTION="encryption key"
+
+# "Drive section|Drive folder|container name|database user"  ("auto" = POSTGRES_USER, else "postgres")
+DB_TARGETS=(
+  "postgres snapshots|main-db|main-db|auto"
+  "supabase snapshots|shop|shop-db-1|postgres"
+)
+
+# Folders under APP_ROOT whose env files are skipped (BASE is always skipped).
+ENV_EXCLUDE=(
+  /opt/apps/backups
+  /opt/apps/logs
+)

@@ -30,7 +30,8 @@ Server Backup/                        (the top folder in your Drive)
 
 ```
 backup/
-  weekly-drive-backup.sh    the backup script (edit the block at the top)
+  weekly-drive-backup.sh    the backup script
+  backup.conf.example       per-server settings (copy to backup.conf next to the script)
   decrypt-from-drive.sh     download one file from Drive and decrypt it
   crontab.example           example schedule
 cron/
@@ -47,7 +48,7 @@ docs/
 ## Quick start
 
 1. Follow [docs/setup.md](docs/setup.md): create a Google login for rclone, install rclone and age, connect Drive.
-2. Copy `backup/weekly-drive-backup.sh` to the server, edit the block at the top, run it once by hand.
+2. Copy `backup/weekly-drive-backup.sh` to the server, put your settings in `backup.conf` next to it (from `backup.conf.example`), run it once by hand.
 3. Add the cron line from `backup/crontab.example`.
 4. **Download the encryption key from Drive and keep a copy in a password manager.** See [docs/decrypt-and-restore.md](docs/decrypt-and-restore.md).
 

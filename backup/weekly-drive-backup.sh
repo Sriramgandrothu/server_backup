@@ -22,12 +22,22 @@ CRON_SECTION="cron backup"
 KEY_SECTION="encryption key"
 
 # One line per Postgres container:  "Drive section|Drive folder|container name|database user"
-# Use "auto" as the user to read POSTGRES_USER from the container.
+# Use "auto" to read POSTGRES_USER from the container (falls back to "postgres" when that login
+# no longer exists, for example after it was renamed).
 DB_TARGETS=(
   "postgres snapshots|main-db|main-db|auto"
   "postgres snapshots|app-db|app-db-1|postgres"
 )
+
+# Folders under APP_ROOT whose env files are NOT backed up (BASE is always skipped).
+ENV_EXCLUDE=()
 # ===============================================================
+
+# Optional per-server settings: a backup.conf next to this script overrides the block above,
+# so the script itself can stay identical to the repository copy.
+CONF="${BACKUP_CONF:-$(dirname "$(readlink -f "$0")")/backup.conf}"
+# shellcheck source=/dev/null
+[ -f "$CONF" ] && . "$CONF"
 
 export RCLONE_CONFIG="$BASE/rclone.conf"
 KEYFILE="$BASE/age-key.txt"          # private key: exists only until it is uploaded
@@ -83,7 +93,10 @@ row() { printf '%-5s %-22s %-40s %10s\n' "$1" "$2" "$3" "$4"; }
 snapshot() { # <section> <folder> <container> <db user>
   local section="$1" folder="$2" c="$3" user="$4"
   local dbs db out new dest
-  if [ "$user" = "auto" ]; then user=$(docker exec "$c" printenv POSTGRES_USER 2>/dev/null); fi
+  if [ "$user" = "auto" ]; then
+    user=$(docker exec "$c" printenv POSTGRES_USER 2>/dev/null)
+    docker exec "$c" psql -U "${user:-postgres}" -d postgres -Atc 'select 1' >/dev/null 2>&1 || user=postgres
+  fi
   [ -n "$user" ] || { fail "$c: no database user"; return; }
   dbs=$(docker exec "$c" psql -U "$user" -d postgres -At -c "select datname from pg_database where not datistemplate" 2>/dev/null) \
     || { fail "$c: cannot list databases"; return; }
@@ -137,9 +150,11 @@ while IFS= read -r f; do
     fail "upload env $rel"
   fi
   rm -f "$TMP/env.age"
-done < <(find "$APP_ROOT" -maxdepth 6 -type f \( -name ".env" -o -name ".env.*" \) ! -name "*.example" \
-           -not -path "*/node_modules/*" -not -path "*/.next/*" -not -path "*/.git/*" \
-           -not -path "$BASE/*" 2>/dev/null)
+done < <(
+  skip=(-not -path "$BASE/*")
+  for d in "${ENV_EXCLUDE[@]}"; do skip+=(-not -path "${d%/}/*"); done
+  find "$APP_ROOT" -maxdepth 6 -type f \( -name ".env" -o -name ".env.*" \) ! -name "*.example" \
+    -not -path "*/node_modules/*" -not -path "*/.next/*" -not -path "*/.git/*" "${skip[@]}" 2>/dev/null)
 
 # --- 3. nginx: copy new and changed files (--update), never delete from Drive
 nginx_copy() { # <rclone verb> <source> <destination>
